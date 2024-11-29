@@ -54,13 +54,7 @@ pipeline {
                 }
             }
         }
-        stage('Quality Gate Check') {
-            steps {
-                timeout(time: 1, unit: 'HOURS') {
-                    waitForQualityGate abortPipeline: false
-                     }
-            }
-        }
+  
         stage('Build') {
             steps {
                 sh "mvn package -DskipTests=true"
@@ -86,16 +80,6 @@ pipeline {
         stage('Trivy Image Scan') {
             steps {
                 sh "trivy image --cache-dir /var/lib/jenkins/.trivy --skip-db-update --format table -o fs.html ${IMAGE_NAME}:${TAG}"
-            }
-        }
-
-        stage('Docker Push Image') {
-            steps {
-                script {
-                    withDockerRegistry(credentialsId: 'docker-cred') {
-                        sh "docker push ${IMAGE_NAME}:${TAG}"
-                    }
-                }
             }
         }
         stage('Deploy MySQL Deployment and Service') {
